@@ -1,9 +1,9 @@
 var center = new Point(5,5);
 
 var Textures = {
-  grass: new Texture('tile_grass.png', 66, 34),
-  dirt:  new Texture('tile_dirt.png', 66, 34),
-  road_n:  new Texture('tile_road_north.png', 66, 34),
+  grass: new Texture('tile_grass.png', 66, 33),
+  dirt:  new Texture('tile_dirt.png', 66, 33),
+  road_n:  new Texture('tile_road_north.png', 66, 33),
   tree:  new Texture('obj_tree.png', 9, 32)
 }
 

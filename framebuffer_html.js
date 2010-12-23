@@ -1,5 +1,7 @@
 var FrameBuffer = (function() {
     var canvas = document.createElement('div');
+    canvas.style.backgroundColor = "#BBB";
+    canvas.style.backgroundRepeat = "repeat"
     canvas.style.position = "fixed";
     canvas.style.overflow = "hidden";
     canvas.style.top = "0";
@@ -17,6 +19,17 @@ var FrameBuffer = (function() {
     }
     api.getWidth = function() {
         return canvas.style.width;
+    }
+
+    api.fill = function(fill) {
+        // Background image
+        if(fill instanceof Texture) {
+            canvas.style.backgroundImage = "url('"+texture.path+"')"
+        }
+        // Background color
+        else {
+            canvas.style.backgroundColor = fill;
+        }
     }
 
     return api;
