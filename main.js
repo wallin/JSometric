@@ -4,7 +4,8 @@ var Textures = {
   grass: new Texture('tile_grass.png', 66, 33),
   dirt:  new Texture('tile_dirt.png', 66, 33),
   road_n:  new Texture('tile_road_north.png', 66, 33),
-  tree:  new Texture('obj_tree.png', 9, 32)
+  tree:  new Texture('obj_tree.png', 9, 32),
+  grid: new Texture('bg_grid.png', 62, 30)
 }
 
 window.random = function(max) {
@@ -14,7 +15,7 @@ window.random = function(max) {
 window.onload = function() {
     var nTiles = 20;
     Map.init(nTiles, nTiles, Textures.grass);
-
+    FrameBuffer.fill(Textures.grid);
     // Place som random dirt
     var num = random(20);
     for(var i = 0; i < num; i++) {
@@ -29,7 +30,7 @@ window.onload = function() {
     // Place a tree
     var obj = new MapObject(1, 1, Textures.tree);
     obj.setLocation(5, 5, Map);
-    Map.render(center,  200, 200, 800, 600);
+    Map.render(center,  200, 200, FrameBuffer.getWidth(), FrameBuffer.getHeight());
 }
 
 
@@ -53,5 +54,5 @@ document.addEventListener('keydown',function(e){
         break;
 
     }
-    Map.render(center,  200, 200, 800, 600);
+    Map.render(center,  200, 200, FrameBuffer.getWidth(), FrameBuffer.getHeight());
 }, false);

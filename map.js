@@ -100,8 +100,9 @@ var Map = (function() {
             y_end = height - 1;
         }
 
-        x_org_sprite = (w_screen / 2) + (w_screen % 2) - tile_width_half;
-        y_org_sprite = (h_screen / 2) + (h_screen % 2) + tile_height_half;
+        // TODO: Snap to tile properly
+        x_org_sprite = Math.round(w_screen / (2*tile_width_half)) * tile_width_half;
+        y_org_sprite = Math.round(h_screen / (tile_width_half)) * tile_height_half + 2;  //TODO:
         x_org_sprite -= (center.x - x_str) * tile_width_half - (center.y - y_str) * tile_width_half;
         y_org_sprite -= (center.x - x_str) * tile_height_half + (center.y - y_str) * tile_height_half;
 

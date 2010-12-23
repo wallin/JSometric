@@ -15,16 +15,16 @@ var FrameBuffer = (function() {
         canvas.appendChild(sprite.img);
     }
     api.getHeight = function() {
-        return canvas.style.height;
+        return canvas.offsetHeight;
     }
     api.getWidth = function() {
-        return canvas.style.width;
+        return canvas.offsetWidth;
     }
 
     api.fill = function(fill) {
         // Background image
         if(fill instanceof Texture) {
-            canvas.style.backgroundImage = "url('"+texture.path+"')"
+            canvas.style.backgroundImage = "url('"+fill.path+"')"
         }
         // Background color
         else {
