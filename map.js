@@ -21,11 +21,11 @@ function MapGrid (x, y, texture) {
     this.Coordinate = new Point(x, y);
     this.Object = false; //TODO: Only one object per tile
     this.Texture = texture;
-    this.sprite = new Image(texture.Width, texture.Height);
+    this.sprite = new Sprite(texture);
     this.sprite.src = texture.path;
 }
 MapGrid.prototype.setTexture = function(texture){
-  this.sprite.src = texture.path;
+  this.sprite.setTexture(texture);
 }
 
 // An object on the map
@@ -35,7 +35,7 @@ function MapObject(w, h, texture) {
   this.Width = w;
   this.Height = h;
   this.Texture = texture;
-  this.sprite = new Image(texture.Width, texture.Height);
+  this.sprite = new Sprite(texture);
   this.sprite.src = texture.path;
 }
 MapObject.prototype.setLocation = function(x, y, map) {
@@ -45,7 +45,6 @@ MapObject.prototype.setLocation = function(x, y, map) {
 }
 
 var Map = (function() {
-    var canvas = false;
     var self = this;
     var grid = [],
         width  = false,
@@ -119,13 +118,11 @@ var Map = (function() {
                     var sprite = current_grid.sprite;
                     var x = x_org_sprite + (x_cur - x_org) * tile_width_half - (y_cur - y_org) * tile_width_half + tile_width_half - current_grid.Texture.Width / 2;
                     var y = y_org_sprite + (x_cur - x_org) * tile_height_half + (y_cur - y_org) * tile_height_half - current_grid.Texture.Height;
-                    sprite.style.top  = y + "px";
-                    sprite.style.left = x + "px";
+                    sprite.render(x,y);
 
                     // Check if there's an object to render
                     if(current_grid.Object) {
-                      current_grid.Object.sprite.style.top = y + "px";
-                      current_grid.Object.sprite.style.left = x + "px";
+                      current_grid.Object.sprite.render(x,y);
                     }
                 }
 
@@ -183,7 +180,6 @@ var Map = (function() {
           var g = getGrid(x, y);
           if(!g.Object) {
             g.Object = object;
-            canvas.appendChild(g.Object.sprite)
           }
         }
       }
@@ -191,7 +187,6 @@ var Map = (function() {
 
     return {
         init: function(w, h, texture) {
-            canvas = document.getElementById('canvas');
             width  = w;
             height = h;
             grid = [];
@@ -201,7 +196,6 @@ var Map = (function() {
                 grid[i] = [];
                 for(var j = 0; j < h; j++) {
                     grid[i][j] = new MapGrid(i, j, texture);
-                    canvas.appendChild(grid[i][j].sprite);
                 }
             }
             return true;
