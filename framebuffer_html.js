@@ -12,6 +12,12 @@ var FrameBuffer = (function() {
     api.addSprite = function(sprite) {
         canvas.appendChild(sprite.img);
     }
+    api.getHeight = function() {
+        return canvas.style.height;
+    }
+    api.getWidth = function() {
+        return canvas.style.width;
+    }
 
     return api;
 })();

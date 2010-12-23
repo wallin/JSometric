@@ -14,7 +14,7 @@ window.random = function(max) {
 window.onload = function() {
     var nTiles = 20;
     Map.init(nTiles, nTiles, Textures.grass);
-       
+
     // Place som random dirt
     var num = random(20);
     for(var i = 0; i < num; i++) {
@@ -29,7 +29,7 @@ window.onload = function() {
     // Place a tree
     var obj = new MapObject(1, 1, Textures.tree);
     obj.setLocation(5, 5, Map);
-    Map.render(center,  20, 20, 800, 600);
+    Map.render(center,  200, 200, 800, 600);
 }
 
 
@@ -53,5 +53,5 @@ document.addEventListener('keydown',function(e){
         break;
 
     }
-    Map.render(center,  20, 20, 800, 600);
+    Map.render(center,  200, 200, 800, 600);
 }, false);

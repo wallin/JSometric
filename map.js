@@ -190,8 +190,10 @@ var Map = (function() {
             width  = w;
             height = h;
             grid = [];
-            tile_width_half = Math.round(texture.Width / 2, 0);
-            tile_height_half = Math.round(texture.Height / 2, 0);
+            // 2px overlap on width
+            // 1px overlap on height
+            tile_width_half = Math.round(texture.Width / 2, 0) - 2;
+            tile_height_half = Math.round(texture.Height / 2, 0) - 1;
             for(var i = 0; i < w; i++) {
                 grid[i] = [];
                 for(var j = 0; j < h; j++) {
