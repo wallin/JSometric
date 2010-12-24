@@ -5,7 +5,8 @@ var Textures = {
   dirt:  new Texture('tile_dirt.png', 66, 33),
   road_n:  new Texture('tile_road_north.png', 66, 33),
   tree:  new Texture('obj_tree.png', 9, 32),
-  grid: new Texture('bg_grid.png', 62, 30)
+  grid: new Texture('bg_grid.png', 62, 30),
+  bus_s: new Texture('obj_bus_south.png', 22, 16)
 }
 
 window.random = function(max) {
@@ -32,6 +33,9 @@ window.onload = function() {
         var obj = new MapObject(1, 1, Textures.tree);
         obj.setLocation(i, 5, Map);
     }
+
+    var bus = new MapObject(1, 1, Textures.bus_s);
+    bus.setLocation(4, 4, Map);
     Map.render(center,  200, 200, FrameBuffer.getWidth(), FrameBuffer.getHeight());
 }
 

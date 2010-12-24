@@ -132,7 +132,7 @@ var Map = (function() {
                     // Check if there's an object to render
                     if(current_grid.Object) {
                         x += tile_width_half - current_grid.Object.Texture.Width/2;
-                        y -= tile_height_half;
+                        y += tile_height_half - current_grid.Object.Texture.Height;
                         current_grid.Object.sprite.render(x,y);
                     }
                 }
