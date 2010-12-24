@@ -27,12 +27,18 @@ window.onload = function() {
       var g = Map.getGrid(i, 4);
       g.setTexture(Textures.road_n);
     }
-    // Place a tree
-    var obj = new MapObject(1, 1, Textures.tree);
-    obj.setLocation(5, 5, Map);
+    // Place trees
+    for(i = 0; i < 10; i++) {
+        var obj = new MapObject(1, 1, Textures.tree);
+        obj.setLocation(i, 5, Map);
+    }
     Map.render(center,  200, 200, FrameBuffer.getWidth(), FrameBuffer.getHeight());
 }
 
+
+document.addEventListener('click', function(e) {
+    Map.getGridLocation(e.clientX, e.clientY);
+}, false);
 
 document.addEventListener('keydown',function(e){
     switch(e.keyCode) {

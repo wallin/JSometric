@@ -1,3 +1,6 @@
+
+
+// TODO: handle when sprites aren't rendered
 var FrameBuffer = (function() {
     var canvas = document.createElement('div');
     canvas.style.backgroundColor = "#BBB";
@@ -28,6 +31,7 @@ var FrameBuffer = (function() {
         }
         // Background color
         else {
+            canvas.style.backgroundImage = "none";
             canvas.style.backgroundColor = fill;
         }
     }

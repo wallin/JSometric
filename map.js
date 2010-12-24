@@ -46,13 +46,16 @@ MapObject.prototype.setLocation = function(x, y, map) {
 
 var Map = (function() {
     var self = this;
+    var center = new Point(0,0);
     var grid = [],
         width  = false,
         height = false,
         tile_width_half,
         tile_height_half;
 
-    function getGrid (arg1, arg2) {
+    var api = {};
+
+    api.getGrid = function (arg1, arg2) {
         var x, y;
         if(typeof(arg1) === 'object' && arg1 instanceof 'Point') {
             x = arg1.x;
@@ -69,8 +72,13 @@ var Map = (function() {
         return grid[x][y];
     }
 
+    // Translate screen pixels to map grid
+    api.getGridLocation = function(x, y) {
+        console.log(x + ", " + y);
+    }
 
-    function render (center, w_disp, h_disp, w_screen, h_screen) {
+    api.render = function(cnt, w_disp, h_disp, w_screen, h_screen) {
+        center = cnt;
         var x_cur, y_cur,
         x_lim, y_lim,
         x_org, y_org,
@@ -123,7 +131,9 @@ var Map = (function() {
 
                     // Check if there's an object to render
                     if(current_grid.Object) {
-                      current_grid.Object.sprite.render(x,y);
+                        x += tile_width_half - current_grid.Object.Texture.Width/2;
+                        y -= tile_height_half;
+                        current_grid.Object.sprite.render(x,y);
                     }
                 }
 
@@ -153,65 +163,54 @@ var Map = (function() {
         }
     }
 
-    function clearObjectLocation(object) {
-      for (var x = object.Location.x; x < object.Location.x + object.Width; x++) {
-        for(var y = object.Location.y; y < object.Location.y + object.Height; y++) {
-          var g = getGrid(x, y);
-          if(g.Object) {
-            g.Object = false;
-          }
-        }
-      }
-    }
-
-    function setObjectLocation(object, point) {
-      if(object.Map !== self) {
-          if(object.Map) {
-            object.Map.clearObjectLocation(object);
-          }
-          object.Map = self;
-      }
-      else {
-        clearObjectLocation(object);
-      }
-
-      object.Location = point;
-      for (var x = point.x; x < point.x + object.Width; x++) {
-        for(var y = point.y; y < point.y + object.Height; y++) {
-          var g = getGrid(x, y);
-          if(!g.Object) {
-            g.Object = object;
-          }
-        }
-      }
-    }
-
-    return {
-        init: function(w, h, texture) {
-            width  = w;
-            height = h;
-            grid = [];
-            // 2px overlap on width (left + right)
-            // 1px overlap on height (bottom)
-            tile_width_half = Math.round(texture.Width / 2, 0) - 2;
-            tile_height_half = Math.floor(texture.Height / 2, 0) - 1;
-            for(var i = 0; i < w; i++) {
-                grid[i] = [];
-                for(var j = 0; j < h; j++) {
-                    grid[i][j] = new MapGrid(i, j, texture);
+    api.clearObjectLocation = function(object) {
+        for (var x = object.Location.x; x < object.Location.x + object.Width; x++) {
+            for(var y = object.Location.y; y < object.Location.y + object.Height; y++) {
+                var g = getGrid(x, y);
+                if(g.Object) {
+                    g.Object = false;
                 }
             }
-            return true;
-        },
-        getWith: function() {
-            return width;
-        },
-        getHeight: function() {
-            return height;
-        },
-        getGrid: getGrid,
-        render: render,
-        setObjectLocation: setObjectLocation
+        }
     }
+
+    api.setObjectLocation = function(object, point) {
+        if(object.Map !== self) {
+            if(object.Map) {
+                object.Map.clearObjectLocation(object);
+            }
+            object.Map = self;
+        }
+        else {
+            api.clearObjectLocation(object);
+        }
+
+        object.Location = point;
+        for (var x = point.x; x < point.x + object.Width; x++) {
+            for(var y = point.y; y < point.y + object.Height; y++) {
+                var g = api.getGrid(x, y);
+                if(!g.Object) {
+                    g.Object = object;
+                }
+            }
+        }
+    }
+    api.init = function(w, h, texture) {
+        width  = w;
+        height = h;
+        grid = [];
+        // 2px overlap on width (left + right)
+        // 1px overlap on height (bottom)
+        tile_width_half = Math.round(texture.Width / 2, 0) - 2;
+        tile_height_half = Math.floor(texture.Height / 2, 0) - 1;
+        for(var i = 0; i < w; i++) {
+            grid[i] = [];
+            for(var j = 0; j < h; j++) {
+                grid[i][j] = new MapGrid(i, j, texture);
+            }
+        }
+        return true;
+    }
+    return api;
 })();
 
