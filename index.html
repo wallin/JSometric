@@ -5,6 +5,7 @@
     <title>Isometric</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <style type="text/css" media="screen">
+      body { font: 11px Arial, Helvetica, sans-serif; }
       #canvas {
       position: relative;
       background-color: black;
@@ -24,7 +25,15 @@
         width: 800px;
         height: 600px;
       }
-      
+      #console {
+      position: fixed;
+      right: 10px;
+      top: 10px;
+      width: 100px;
+      height: 100px;
+      background-color: #FFF;
+      padding: 5px;
+      }
     </style>
   </head>
   <body>
@@ -32,4 +41,5 @@
   <script type="text/javascript" src="framebuffer_html.js"></script>
   <script type="text/javascript" src="map.js"></script>
   <script type="text/javascript" src="main.js"></script>
+  <script type="text/javascript" src="console.js"></script>
 </html>
