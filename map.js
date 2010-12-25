@@ -38,7 +38,8 @@ MapGrid.prototype.setTexture = function(texture){
 // An object on the map
 function MapObject(w, h, texture) {
   this.Map = false;
-  this.Location = false;
+  this.MapLocation = false;
+  this.Offset = new Point(0,0); // Object displacement
   this.Width = w;
   this.Height = h;
   this.Texture = texture;
@@ -49,6 +50,53 @@ MapObject.prototype.setLocation = function(x, y, map) {
   if(map) {
     map.setObjectLocation(this, new Point(x, y));
   }
+}
+MapObject.prototype.move = function(points, speed) {
+    var self = this;
+    var fps =50;
+    var steps = (speed || 1000) / fps;
+    var timer = false;
+
+
+    function moveStep (points) {
+        var point = points.pop();
+        // Reset offset
+        self.Offset.x = 0;
+        self.Offset.y = 0;
+        // Are we done?
+        if(!point) {
+            return;
+        }
+        // Get grid pixel location
+        var start = Map.gridToScreen(self.MapLocation.x, self.MapLocation.y, self);
+        var end   = Map.gridToScreen(point.x, point.y, self);
+
+        // Calculate step size
+        var dx = (end.x - start.x) / steps;
+        var dy = (end.y - start.y) / steps;
+
+        // Animation
+        function next() {
+            if(steps-- === 0) {
+                self.setLocation(point.x, point.y, Map);
+                moveStep(points);
+                return;
+            }
+            // Need to fetch everytime since user might change map location
+            var start = Map.gridToScreen(self.MapLocation.x, self.MapLocation.y, self);
+
+            self.Offset.x += dx;
+            self.Offset.y += dy;
+
+            start.x += self.Offset.x;
+            start.y += self.Offset.y;
+            // Draw object and advance to next
+            self.sprite.render(start);
+            self.timer = setTimeout(next, fps);
+        }
+        next();
+    }
+    moveStep(points);
 }
 
 var Map = (function() {
@@ -132,13 +180,13 @@ var Map = (function() {
                 if(grid[x_cur] && grid[x_cur][y_cur]) {
                     var current_grid = grid[x_cur][y_cur];
                     var sprite = current_grid.sprite;
-                    var p = gridToScreen(x_cur, y_cur, current_grid);
+                    var p = api.gridToScreen(x_cur, y_cur, current_grid);
                     sprite.render(p);
 
                     // Check if there's an object to render
                     if(current_grid.Object) {
-                        p.x += tile_width_half - current_grid.Object.Texture.Width/2 ;
-                        p.y += tile_height_half - current_grid.Object.Texture.Height;
+                        p.x += tile_width_half - current_grid.Object.Texture.Width/2 + current_grid.Object.Offset.x;
+                        p.y += tile_height_half - current_grid.Object.Texture.Height + current_grid.Object.Offset.y;
                         current_grid.Object.sprite.render(p);
                     }
                 }
@@ -169,16 +217,16 @@ var Map = (function() {
         }
     }
 
-    function gridToScreen(x, y, grid) {
+    api.gridToScreen = function(x, y, grid) {
         var rx = x_org_sprite + (x - x_org) * tile_width_half - (y - y_org) * tile_width_half + tile_width_half - grid.Texture.Width / 2;
         var ry = y_org_sprite + (x - x_org) * tile_height_half + (y - y_org) * tile_height_half - grid.Texture.Height;
         return new Point(rx, ry);
     }
 
     api.clearObjectLocation = function(object) {
-        for (var x = object.Location.x; x < object.Location.x + object.Width; x++) {
-            for(var y = object.Location.y; y < object.Location.y + object.Height; y++) {
-                var g = getGrid(x, y);
+        for (var x = object.MapLocation.x; x < object.MapLocation.x + object.Width; x++) {
+            for(var y = object.MapLocation.y; y < object.MapLocation.y + object.Height; y++) {
+                var g = api.getGrid(x, y);
                 if(g.Object) {
                     g.Object = false;
                 }
@@ -197,7 +245,7 @@ var Map = (function() {
             api.clearObjectLocation(object);
         }
 
-        object.Location = point;
+        object.MapLocation = point;
         for (var x = point.x; x < point.x + object.Width; x++) {
             for(var y = point.y; y < point.y + object.Height; y++) {
                 var g = api.getGrid(x, y);
