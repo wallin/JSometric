@@ -50,7 +50,7 @@ Sprite.prototype.setTexture = function(texture) {
     this.img.src = texture.path;
 }
 
-Sprite.prototype.render = function(x, y) {
-    this.img.style.top = y + "px";
-    this.img.style.left = x + "px";
+Sprite.prototype.render = function(point) {
+    this.img.style.top = point.y + "px";
+    this.img.style.left = point.x + "px";
 };

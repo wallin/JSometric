@@ -4,6 +4,13 @@
  */
 
 
+/**
+ * TODO:
+ * - Implement support for object height
+ * - Add event system for collision detection and movement registration
+ * - Add  support for moving objects
+ */
+
 // Ad point in map-space
 function Point (x, y) {
     this.x = x;
@@ -47,6 +54,8 @@ MapObject.prototype.setLocation = function(x, y, map) {
 var Map = (function() {
     var self = this;
     var center = new Point(0,0);
+    var x_org_sprite, y_org_sprite;
+    var x_org, y_org;
     var grid = [],
         width  = false,
         height = false,
@@ -81,11 +90,9 @@ var Map = (function() {
         center = cnt;
         var x_cur, y_cur,
         x_lim, y_lim,
-        x_org, y_org,
         x_str, y_str,
         x_end, y_end;
         var x_edge, y_edge;
-        var x_org_sprite, y_org_sprite;
         x_org = x_str = x_lim = center.x - (w_disp / 2);
         y_org = y_str = y_lim = center.y - (h_disp / 2);
 
@@ -125,15 +132,14 @@ var Map = (function() {
                 if(grid[x_cur] && grid[x_cur][y_cur]) {
                     var current_grid = grid[x_cur][y_cur];
                     var sprite = current_grid.sprite;
-                    var x = x_org_sprite + (x_cur - x_org) * tile_width_half - (y_cur - y_org) * tile_width_half + tile_width_half - current_grid.Texture.Width / 2;
-                    var y = y_org_sprite + (x_cur - x_org) * tile_height_half + (y_cur - y_org) * tile_height_half - current_grid.Texture.Height;
-                    sprite.render(x,y);
+                    var p = gridToScreen(x_cur, y_cur, current_grid);
+                    sprite.render(p);
 
                     // Check if there's an object to render
                     if(current_grid.Object) {
-                        x += tile_width_half - current_grid.Object.Texture.Width/2;
-                        y += tile_height_half - current_grid.Object.Texture.Height;
-                        current_grid.Object.sprite.render(x,y);
+                        p.x += tile_width_half - current_grid.Object.Texture.Width/2 ;
+                        p.y += tile_height_half - current_grid.Object.Texture.Height;
+                        current_grid.Object.sprite.render(p);
                     }
                 }
 
@@ -161,6 +167,12 @@ var Map = (function() {
                 break;
             }
         }
+    }
+
+    function gridToScreen(x, y, grid) {
+        var rx = x_org_sprite + (x - x_org) * tile_width_half - (y - y_org) * tile_width_half + tile_width_half - grid.Texture.Width / 2;
+        var ry = y_org_sprite + (x - x_org) * tile_height_half + (y - y_org) * tile_height_half - grid.Texture.Height;
+        return new Point(rx, ry);
     }
 
     api.clearObjectLocation = function(object) {
