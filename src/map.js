@@ -8,7 +8,6 @@
  * TODO:
  * - Implement support for object height
  * - Add event system for collision detection and movement registration
- * - Add  support for moving objects
  */
 
 // Ad point in map-space
@@ -16,6 +15,41 @@ function Point (x, y) {
     this.x = x;
     this.y = y;
 }
+
+Array.prototype.interpolate = function() {
+    var points = this;
+    if(points.length > 1 &&
+       points[0] instanceof Point) {
+        var rv = [];
+        for(var idx = 1; idx < points.length; idx++) {
+            var x_str = points[idx-1].x;
+            var y_str = points[idx-1].y;
+            var x_end = points[idx].x;
+            var y_end = points[idx].y;
+
+            var x_step = (x_end - x_str) < 0 ? -1 : 1;
+            var y_step = (y_end - y_str) < 0 ? -1 : 1;
+            var x_bnd = false;
+            var y_bnd = false;
+
+            while(true) {
+                if(!x_bnd && (x_str += x_step) === x_end) {
+                    x_bnd = true;
+                }
+                if(!y_bnd && (y_str += y_step) === y_end) {
+                    y_bnd = true;
+                }
+                rv.push(new Point(x_str, y_str));
+
+                if(x_bnd && y_bnd) {
+                    break;
+                }
+            }
+        }
+        return rv;
+    }
+    return this;
+};
 
 // Meta data for an image
 function Texture(path, w, h) {
@@ -54,10 +88,13 @@ MapObject.prototype.setLocation = function(x, y, map) {
 }
 MapObject.prototype.move = function(points, speed) {
     var self = this;
-    var fps =50;
-    var steps = (speed || 1000) / fps;
-    var timer = false;
-    var cLoc = new Point(0,0);
+    if(!self.Map) {
+        throw "Can't move an object that is not on a map"
+    }
+    var fps = 50;              // Time in ms between animation steps
+    var steps = (speed || 1000) / fps; // Speed is ms per mapgrid
+    var timer = false;         // Maybe not needed
+    var cLoc = new Point(0,0); // Current location when animating
 
     function moveStep () {
         var point = points.pop();
@@ -78,8 +115,7 @@ MapObject.prototype.move = function(points, speed) {
                 // Reset offset
                 self.Offset.x = 0;
                 self.Offset.y = 0;
-
-                self.setLocation(point.x, point.y, Map);
+                self.setLocation(point.x, point.y, self.Map);
                 setTimeout(moveStep, 1);
                 return;
             }
@@ -100,7 +136,6 @@ MapObject.prototype.move = function(points, speed) {
 }
 
 var Map = (function() {
-    var self = this;
     var center = new Point(0,0);
     var x_org_sprite, y_org_sprite;
     var x_org, y_org;
@@ -250,7 +285,7 @@ var Map = (function() {
             if(object.Map) {
                 object.Map.clearObjectLocation(object);
             }
-            object.Map = self;
+            object.Map = api;
         }
         else {
             api.clearObjectLocation(object);
