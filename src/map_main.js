@@ -101,13 +101,7 @@ var Map = (function() {
 
                     // Check if there's an object to render
                     if(current_grid.Object) {
-                        var obj = current_grid.Object;
-                        obj.ScreenLocation.x = current_grid.ScreenLocation.x -
-                            obj.Center.x + obj.Offset.x;
-                        obj.ScreenLocation.y = current_grid.ScreenLocation.y -
-                            obj.Center.y + obj.Offset.y;
-
-                        obj.sprite.render(obj.ScreenLocation);
+                        current_grid.renderObject(current_grid.Object);
                     }
                 }
 
@@ -137,6 +131,7 @@ var Map = (function() {
         }
     }
 
+    // Get screen coordinates from map grid position
     api.gridToScreen = function(x, y) {
         if(grid[x] && grid[x][y]) {
             return grid[x][y].ScreenLocation;
@@ -155,6 +150,7 @@ var Map = (function() {
         }
     }
 
+    // Set object grid location on the map
     api.setObjectLocation = function(object, point) {
         if(object.Map !== self) {
             if(object.Map) {

@@ -58,13 +58,23 @@ function Texture(path, w, h) {
 
 function MapGrid (x, y, texture) {
     this.Coordinate = new Point(x, y);
-    this.Object = false; //TODO: Only one object per tile
+    this.Objects = [];
     this.Texture = texture;
     this.ScreenLocation = new Point(0,0);
     this.sprite = new Sprite(texture);
 }
 MapGrid.prototype.setTexture = function(texture){
     this.sprite.setTexture(texture);
+}
+
+// TODO: re-think this mess
+MapGrid.prototype.renderObject = function(obj) {
+    obj.ScreenLocation.x = this.ScreenLocation.x -
+        obj.Center.x + obj.Offset.x;
+    obj.ScreenLocation.y = this.ScreenLocation.y -
+        obj.Center.y + obj.Offset.y;
+
+    obj.sprite.render(obj.ScreenLocation);
 }
 
 // A simple object on the map
@@ -94,7 +104,6 @@ MapObject.prototype.move = function(points, speed) {
     var fps = 50;              // Time in ms between animation steps
     var steps = (speed || 1000) / fps; // Speed is ms per mapgrid
     var timer = false;         // Maybe not needed
-    var cLoc = new Point(0,0); // Current location when animating
 
     // Add own position
     points.unshift(self.MapLocation);
@@ -110,6 +119,7 @@ MapObject.prototype.move = function(points, speed) {
         var point = points.shift();
 
         // Get grid pixel location
+        var cGrid = self.Map.getGrid(self.MapLocation.x, self.MapLocation.y);
         var start = Map.gridToScreen(self.MapLocation.x, self.MapLocation.y, self);
         var end   = Map.gridToScreen(point.x, point.y, self);
         // Calculate step size
@@ -126,15 +136,12 @@ MapObject.prototype.move = function(points, speed) {
                 setTimeout(moveStep, 1);
                 return;
             }
-            // Need to fetch everytime since user might change map location
-            var start = Map.gridToScreen(self.MapLocation.x, self.MapLocation.y);
+
             self.Offset.x += dx;
             self.Offset.y += dy;
 
-            cLoc.x = start.x + self.Offset.x - self.Center.x;
-            cLoc.y = start.y + self.Offset.y - self.Center.y;
             // Draw object and advance to next
-            self.sprite.render(cLoc);
+            cGrid.renderObject(self);
             self.timer = setTimeout(next, fps);
         }
         next();
