@@ -21,6 +21,7 @@ Array.prototype.interpolate = function() {
     if(points.length > 1 &&
        points[0] instanceof Point) {
         var rv = [];
+        var x_end, y_end;
         for(var idx = 1; idx < points.length; idx++) {
             var x_str = points[idx-1].x;
             var y_str = points[idx-1].y;
@@ -33,17 +34,24 @@ Array.prototype.interpolate = function() {
             var y_bnd = false;
 
             while(true) {
-                if(!x_bnd && (x_str += x_step) === x_end) {
+                if(x_str === x_end) {
                     x_bnd = true;
                 }
-                if(!y_bnd && (y_str += y_step) === y_end) {
+                if(!x_bnd) {
+                    x_str += x_step;
+                }
+
+                if(y_str === y_end) {
                     y_bnd = true;
                 }
-                rv.push(new Point(x_str, y_str));
+                if(!y_bnd) {
+                    y_str += y_step;
+                }
 
                 if(x_bnd && y_bnd) {
                     break;
                 }
+                rv.push(new Point(x_str, y_str));
             }
         }
         return rv;
@@ -96,12 +104,19 @@ MapObject.prototype.move = function(points, speed) {
     var timer = false;         // Maybe not needed
     var cLoc = new Point(0,0); // Current location when animating
 
+    // Add own position
+    points.unshift(self.MapLocation);
+    // Get complete path
+    points = points.interpolate();
+
     function moveStep () {
-        var point = points.pop();
         // Are we done?
-        if(!point) {
+        if(points.length === 0) {
             return;
         }
+        var stp = steps;
+        var point = points.shift();
+
         // Get grid pixel location
         var start = Map.gridToScreen(self.MapLocation.x, self.MapLocation.y, self);
         var end   = Map.gridToScreen(point.x, point.y, self);
@@ -111,7 +126,7 @@ MapObject.prototype.move = function(points, speed) {
 
         // Animation
         function next() {
-            if(steps-- === 0) {
+            if(stp-- <= 0) {
                 // Reset offset
                 self.Offset.x = 0;
                 self.Offset.y = 0;
