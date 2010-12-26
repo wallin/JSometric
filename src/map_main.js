@@ -10,17 +10,6 @@
  * - Add event system for collision detection and movement registration
  */
 
-function MapGrid (x, y, texture) {
-    this.Coordinate = new Point(x, y);
-    this.Object = false; //TODO: Only one object per tile
-    this.Texture = texture;
-    this.ScreenLocation = new Point(0,0);
-    this.sprite = new Sprite(texture);
-}
-MapGrid.prototype.setTexture = function(texture){
-    this.sprite.setTexture(texture);
-}
-
 var Map = (function() {
     var center = new Point(0,0);
     var x_org_sprite, y_org_sprite;

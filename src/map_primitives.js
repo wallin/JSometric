@@ -1,9 +1,3 @@
-// Describe X/Y-coordinate
-function Point (x, y) {
-    this.x = x;
-    this.y = y;
-}
-
 // Method for interpolating a path of points
 // TODO: Bresenhams line algo.
 Array.prototype.interpolate = function() {
@@ -49,11 +43,28 @@ Array.prototype.interpolate = function() {
     return this;
 };
 
+// Describe X/Y-coordinate
+function Point (x, y) {
+    this.x = x;
+    this.y = y;
+}
+
 // Meta data for an image
 function Texture(path, w, h) {
     this.path = path;
     this.Width = w;
     this.Height = h;
+}
+
+function MapGrid (x, y, texture) {
+    this.Coordinate = new Point(x, y);
+    this.Object = false; //TODO: Only one object per tile
+    this.Texture = texture;
+    this.ScreenLocation = new Point(0,0);
+    this.sprite = new Sprite(texture);
+}
+MapGrid.prototype.setTexture = function(texture){
+    this.sprite.setTexture(texture);
 }
 
 // A simple object on the map
