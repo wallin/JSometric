@@ -28,41 +28,39 @@ function MapGrid (x, y, texture) {
     this.Coordinate = new Point(x, y);
     this.Object = false; //TODO: Only one object per tile
     this.Texture = texture;
+    this.ScreenLocation = new Point(0,0);
     this.sprite = new Sprite(texture);
-    this.sprite.src = texture.path;
 }
 MapGrid.prototype.setTexture = function(texture){
-  this.sprite.setTexture(texture);
+    this.sprite.setTexture(texture);
 }
 
 // An object on the map
 function MapObject(w, h, texture) {
-  this.Map = false;
-  this.MapLocation = false;
-  this.Offset = new Point(0,0); // Object displacement
-  this.Width = w;
-  this.Height = h;
-  this.Texture = texture;
-  this.sprite = new Sprite(texture);
-  this.sprite.src = texture.path;
+    this.Map = false;
+    this.MapLocation = false;
+    this.ScreenLocation = new Point(0, 0);
+    this.Offset = new Point(0, 0); // Object displacement
+    this.Center = new Point(texture.Width / 2, texture.Height);    // Object center point
+    this.Width = w;               // Width in map grids
+    this.Height = h;              // Height in map grids
+    this.Texture = texture;
+    this.sprite = new Sprite(texture);
 }
 MapObject.prototype.setLocation = function(x, y, map) {
-  if(map) {
-    map.setObjectLocation(this, new Point(x, y));
-  }
+    if(map) {
+        map.setObjectLocation(this, new Point(x, y));
+    }
 }
 MapObject.prototype.move = function(points, speed) {
     var self = this;
     var fps =50;
     var steps = (speed || 1000) / fps;
     var timer = false;
+    var cLoc = new Point(0,0);
 
-
-    function moveStep (points) {
+    function moveStep () {
         var point = points.pop();
-        // Reset offset
-        self.Offset.x = 0;
-        self.Offset.y = 0;
         // Are we done?
         if(!point) {
             return;
@@ -70,7 +68,6 @@ MapObject.prototype.move = function(points, speed) {
         // Get grid pixel location
         var start = Map.gridToScreen(self.MapLocation.x, self.MapLocation.y, self);
         var end   = Map.gridToScreen(point.x, point.y, self);
-
         // Calculate step size
         var dx = (end.x - start.x) / steps;
         var dy = (end.y - start.y) / steps;
@@ -78,25 +75,28 @@ MapObject.prototype.move = function(points, speed) {
         // Animation
         function next() {
             if(steps-- === 0) {
+                // Reset offset
+                self.Offset.x = 0;
+                self.Offset.y = 0;
+
                 self.setLocation(point.x, point.y, Map);
-                moveStep(points);
+                setTimeout(moveStep, 1);
                 return;
             }
             // Need to fetch everytime since user might change map location
-            var start = Map.gridToScreen(self.MapLocation.x, self.MapLocation.y, self);
-
+            var start = Map.gridToScreen(self.MapLocation.x, self.MapLocation.y);
             self.Offset.x += dx;
             self.Offset.y += dy;
 
-            start.x += self.Offset.x;
-            start.y += self.Offset.y;
+            cLoc.x = start.x + self.Offset.x - self.Center.x;
+            cLoc.y = start.y + self.Offset.y - self.Center.y;
             // Draw object and advance to next
-            self.sprite.render(start);
+            self.sprite.render(cLoc);
             self.timer = setTimeout(next, fps);
         }
         next();
     }
-    moveStep(points);
+    moveStep();
 }
 
 var Map = (function() {
@@ -180,14 +180,24 @@ var Map = (function() {
                 if(grid[x_cur] && grid[x_cur][y_cur]) {
                     var current_grid = grid[x_cur][y_cur];
                     var sprite = current_grid.sprite;
-                    var p = api.gridToScreen(x_cur, y_cur, current_grid);
-                    sprite.render(p);
+                    current_grid.ScreenLocation.x = x_org_sprite + (x_cur - x_org) * tile_width_half - (y_cur - y_org) * tile_width_half - current_grid.Texture.Width /2;
+                    current_grid.ScreenLocation.y = y_org_sprite + (x_cur - x_org) * tile_height_half + (y_cur - y_org) * (tile_height_half) - current_grid.Texture.Height / 2;
+
+                    sprite.render(current_grid.ScreenLocation);
+
+                    // XXX: Ugly. ScreenLocation should be center of tile
+                    current_grid.ScreenLocation.x += current_grid.Texture.Width / 2;
+                    current_grid.ScreenLocation.y += current_grid.Texture.Height / 2;
 
                     // Check if there's an object to render
                     if(current_grid.Object) {
-                        p.x += tile_width_half - current_grid.Object.Texture.Width/2 + current_grid.Object.Offset.x;
-                        p.y += tile_height_half - current_grid.Object.Texture.Height + current_grid.Object.Offset.y;
-                        current_grid.Object.sprite.render(p);
+                        var obj = current_grid.Object;
+                        obj.ScreenLocation.x = current_grid.ScreenLocation.x -
+                            obj.Center.x + obj.Offset.x;
+                        obj.ScreenLocation.y = current_grid.ScreenLocation.y -
+                            obj.Center.y + obj.Offset.y;
+
+                        obj.sprite.render(obj.ScreenLocation);
                     }
                 }
 
@@ -217,10 +227,11 @@ var Map = (function() {
         }
     }
 
-    api.gridToScreen = function(x, y, grid) {
-        var rx = x_org_sprite + (x - x_org) * tile_width_half - (y - y_org) * tile_width_half + tile_width_half - grid.Texture.Width / 2;
-        var ry = y_org_sprite + (x - x_org) * tile_height_half + (y - y_org) * tile_height_half - grid.Texture.Height;
-        return new Point(rx, ry);
+    api.gridToScreen = function(x, y) {
+        if(grid[x] && grid[x][y]) {
+            return grid[x][y].ScreenLocation;
+        }
+        return false;
     }
 
     api.clearObjectLocation = function(object) {

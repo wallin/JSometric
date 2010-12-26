@@ -35,9 +35,9 @@ window.onload = function() {
     }
 
     var bus = new MapObject(1, 1, Textures.bus_s);
-    bus.setLocation(4, 4, Map);
+    bus.setLocation(0, 4, Map);
     Map.render(center,  200, 200, FrameBuffer.getWidth(), FrameBuffer.getHeight());
-    bus.move([new Point(9, 4)], 10000);
+    bus.move([new Point(nTiles-1, 4)], 10000);
 }
 
 
