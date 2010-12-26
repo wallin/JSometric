@@ -28,16 +28,26 @@ window.onload = function() {
       var g = Map.getGrid(i, 4);
       g.setTexture(Textures.road_n);
     }
+
+    var bus = new MapObject(1, 1, Textures.bus_s);
+    bus.setLocation(0, 4, Map);
+
+    var bus2 = new MapObject(1, 1, Textures.bus_s);
+    bus2.setLocation(19, 4, Map);
+
+    bus2.Center.y -= 7;
+
+    Map.render(center,  200, 200, FrameBuffer.getWidth(), FrameBuffer.getHeight());
+    bus.move([new Point(nTiles-1, 4)], 1000);
+    bus2.move([new Point(0, 4)], 1000);
+
     // Place trees
     for(i = 0; i < 10; i++) {
         var obj = new MapObject(1, 1, Textures.tree);
         obj.setLocation(i, 5, Map);
     }
-
-    var bus = new MapObject(1, 1, Textures.bus_s);
-    bus.setLocation(0, 4, Map);
     Map.render(center,  200, 200, FrameBuffer.getWidth(), FrameBuffer.getHeight());
-    bus.move([new Point(nTiles-1, 4)], 1000);
+
 }
 
 
