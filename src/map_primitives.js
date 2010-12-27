@@ -56,6 +56,27 @@ function Texture(path, w, h) {
     this.Height = h;
 }
 
+//Basic event machine
+function Event() {
+    this._listeners = {};
+}
+Event.prototype.bind = function(eventName, callback) {
+    if(!(eventName in this._listeners)) {
+        this._listeners[eventName] = [];
+    }
+    return this._listeners[eventName].push(callback) - 1;
+};
+Event.prototype.trigger = function(eventName, args) {
+    if(eventName in this._listeners) {
+        for(var i in this._listeners[eventName]) {
+            if(this._listeners[eventName].hasOwnProperty(i)) {
+                setTimeout(this._listeners[eventName][i], 1, this);
+            }
+        }
+    }
+};
+
+
 function MapGrid (x, y, texture) {
     this.Coordinate = new Point(x, y);
     this.Objects = [];
@@ -90,9 +111,13 @@ function MapObject(w, h, texture) {
     this.sprite = new Sprite(texture);
 }
 
+// Get methods from event base
+MapObject.prototype = new Event();
+
 MapObject.prototype.setLocation = function(x, y, map) {
     if(map) {
         map.setObjectLocation(this, new Point(x, y));
+        this.trigger('move');
     }
 };
 
