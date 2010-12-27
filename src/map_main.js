@@ -7,7 +7,9 @@
 /**
  * TODO:
  * - Implement support for object height
- * - Add event system for collision detection and movement registration
+ * - Add support for many object on the same grid. Sub-grids
+ * - Handle z-index properly
+ * - Implement more complex object with direction and multiple textures
  */
 
 var Map = (function() {
